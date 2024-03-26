@@ -153,7 +153,7 @@ class Labirinto(Problem):
                 break
         return (state, cost, obj)
 
-    def comparar_orientacao(self,state):
+    def comparar_orientacao_mesma_linhacoluna(self,state):
         """
         given that the car is in the same line/column as the goal but not in the goal itself, we need to check if the car is facing the goal.
         if the goal is north from the car and the car is facing north, then the minRotacoes heuristic value is 0.
@@ -203,7 +203,39 @@ class Labirinto(Problem):
                 else:
                     return 0
 
+    def comparar_orientacao_linha_dif_linhacoluna(self,state):
+        """
+        case where the car is in a different line and column from the goal
+        if goal is northeast compared to the car and the car is facing north or east, then the minRotacoes heuristic value is 1 (only one rotation necessary).
+        if goal is northeast compared to the car and the car is facing south or west, then the minRotacoes heuristic value is 2 (2 rotations necessary).
+        """
 
+        x,y = state[0][0], state[0][1]
+        gx, gy = self.goal[0], self.goal[1]
+        car_orientation = state[1]
+
+        #we start by creating a list that has the mix of directions of the goal compared to the car
+        #e.g.: if the goal is northeast from the car, then we have the list ['N','E']
+        lista_orientacoes = []
+
+        #seeing if goal is north or south from the car
+        if x > gx:
+            lista_orientacoes.append('N')
+        else:
+            lista_orientacoes.append('S')
+        
+        #seeing if goal is east or west from the car
+        if y > gy:
+            lista_orientacoes.append('O')
+        else:
+            lista_orientacoes.append('E')
+        
+        #now we check the car orientation and return the heuristic value
+        #e.g.: if goal is northeast and car is either turning north or east, then it only has to rotate once. otherwise it has to rotate twice
+        if car_orientation in lista_orientacoes:
+            return 1
+        else:
+            return 2
 
 
     def minRotacoes(self,node):
@@ -222,11 +254,11 @@ class Labirinto(Problem):
         #case where the car is in the same line/column as the goal.
         #we need to check if the car is facing the goal
         elif coordinates[0] == self.goal[0] or coordinates[1] == self.goal[1]:
-            heuristic_value += self.comparar_orientacao(state)
+            heuristic_value += self.comparar_orientacao_mesma_linhacoluna(state)
             
-        #else- todas as outras condições nao abordadas nao precisam de ser detalhadas e podemos so adicionar 2 ao heuristic value
+        #else- car in a different line and column from goal
         else:
-            heuristic_value += 2
+            heuristic_value += self.comparar_orientacao_linha_dif_linhacoluna(state)
 
         return heuristic_value
 
@@ -276,13 +308,3 @@ class Labirinto(Problem):
         total_actions = actions_x + actions_y
 
         return total_actions
-
-
-
-
-
-
-
-
-
-
