@@ -233,10 +233,56 @@ class Labirinto(Problem):
     
 
     
-    def minAeTs(self,node):
-        pass
-    
+
+
+    def minAeTs(self, node):
+        """
+        Estimate the minimum number of actions required to 'park' the car at the goal,
+        considering the car's maximum speed. The car must first align with the goal's
+        row or column, and then move to the goal, stopping with a speed of 0.
+        """
+        # Unpack the current state from the node
+        (x, y), _, speed = node.state  # Current position and speed; orientation ignored
+        goal_x, goal_y = self.goal  # Goal position
+
+        # Calculate the absolute distance to the goal in both directions
+        dist_x = abs(x - goal_x)
+        dist_y = abs(y - goal_y)
+
+        # Internal function to calculate minimum actions for a given distance and maximum speed
+        def min_actions(distance, vmax):
+            # Total actions needed, starting from a speed of 0
+            actions = 0
+            current_speed = 0
+
+            while distance > 0 or current_speed > 0:
+                # Determine whether to accelerate or decelerate
+                if distance > (current_speed * (current_speed + 1)) // 2:
+                    # Safe to accelerate
+                    current_speed += 1
+                else:
+                    # Need to decelerate
+                    current_speed -= 1
+                distance -= current_speed
+                actions += 1
+
+            return actions
+
+        # Calculate actions needed for each dimension (x and y)
+        actions_x = min_actions(dist_x, self.vmax)
+        actions_y = min_actions(dist_y, self.vmax)
+
+        # Total actions is the sum needed for x and y directions
+        total_actions = actions_x + actions_y
+
+        return total_actions
 
 
 
-#codigo de minRotacoes so nao passa ao quinto exemplo de teste
+
+
+
+
+
+
+
