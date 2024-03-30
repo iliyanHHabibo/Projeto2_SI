@@ -1,5 +1,5 @@
 from searchPlus import *
-import utils
+
 line1 = "= = = = = = =\n"
 line2 = "= x . . . . =\n"
 line3 = "= . . . = . =\n"
@@ -262,7 +262,9 @@ class Labirinto(Problem):
 
         return heuristic_value
 
+    
 
+    
 
 
     def minAeTs(self, node):
@@ -284,39 +286,56 @@ class Labirinto(Problem):
             # Total actions needed, starting from a speed of 0
             actions = 0
             current_speed = 0
-            distance_covered = 0
-            while distance+1 !=distance_covered:
-                #check if we are at the goal and current speed is 0
-                if distance_covered == distance and current_speed == 0:
-                    break
-                #check if we are at the goal but current speed is not 0
-                if distance_covered == distance and current_speed != 0:
-                    current_speed = current_speed - 1
-                    actions += 1
-                    distance_covered+= current_speed
-        
-                    break
-                #check if we can increase distance_covered or maintain the current speed, if not then we need to decrease speed
-                if (distance_covered + min(current_speed + 1,vmax) > distance and current_speed!=0)or (distance_covered + current_speed > distance):
-                    current_speed -=1
-                    distance_covered+= current_speed 
-                    actions += 1
-                
-                
-                #if we can increase distance_covered by the current speed
-                else:
-                    # Calculate the distance that can be covered with the current speed
-                    if current_speed == vmax:
-                        distance_covered+= vmax
-                        actions += 1
+
+            while distance > 0 or current_speed > 0:
+                # Determine whether to accelerate or decelerate
+            
+                if distance == 0 and current_speed ==1:
+                    # Need to decelerate to stop at the goal
+                    current_speed -= 1
+                elif self.vmax == 1:
+                    if distance > 0:
+                        current_speed =min(current_speed + 1, vmax)
                     else:
-                        
-                    # Update the current speed
-                        current_speed = min(current_speed + 1, vmax)
-                        distance_covered+= current_speed
-                    # Update the number of actions needed
-                        actions += 1
+                        current_speed -= 1
+                elif self.vmax == 2:
+                    if distance >= 3 and current_speed==2:
+                        current_speed =min(current_speed + 1, vmax)
+                    elif distance !=0 and current_speed == 0:
+                        current_speed =min(current_speed + 1, vmax)
+                    else:
+                        if distance > (current_speed * (current_speed + 1)) // 2:
+                            current_speed =min(current_speed + 1, vmax)
+                        else:
+                            current_speed -= 1
+                elif self.vmax == 3:
+                    if distance >= 5 and current_speed==3:
+                        current_speed =min(current_speed + 1, vmax)
+                    elif distance !=0 and current_speed == 0:
+                        current_speed =min(current_speed + 1, vmax)
+                    else:
+                        if distance > (current_speed * (current_speed + 1)) // 2:
+                            current_speed =min(current_speed + 1, vmax)
+                        else:
+                            current_speed -= 1
+                elif distance > (current_speed * (current_speed + 1)) // 2:
+                    # Safe to accelerate
+                    current_speed =min(current_speed + 1, vmax)
+                    
+                elif current_speed == 0:
+                    # Need to accelerate to reach the goal
+                    current_speed= min(current_speed + 1, vmax)
+                
+                
+                
+                else:
+                    # Need to decelerate
+                    current_speed -= 1
+                distance -= current_speed
+                actions += 1
+
             return actions
+
         # Calculate actions needed for each dimension (x and y)
         actions_x = min_actions(dist_x, self.vmax)
         actions_y = min_actions(dist_y, self.vmax)
@@ -325,8 +344,15 @@ class Labirinto(Problem):
         total_actions = actions_x + actions_y
 
         return total_actions
-    
-p = Labirinto(grelha)
-res_astar = greedy_best_first_graph_search(p,p.minAeTs)
-print(res_astar.solution())
-print(res_astar.path_cost)
+line1 = "= = = = = = = = = = =\n"
+line2 = "= . . . . . . . . . =\n"
+line3 = "= . > . = . . . . . =\n"
+line4 = "= . . . = . = . . . =\n"
+line5 = "= = = . = . = . x . =\n"
+line6 = "= . . . . . . . = . =\n"
+line7 = "= = = = = = = = = = =\n"
+grelha2 = line1 + line2 + line3 + line4 + line5 + line6 + line7
+p2 = Labirinto(grelha2,vmax=100)
+print(p2.display(p2.initial))
+print(p2.minAeTs(Node(p2.initial)))
+
